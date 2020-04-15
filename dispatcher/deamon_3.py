@@ -25,13 +25,14 @@ if server_url:
 else:
     logger.error("Server URL not provided")
 
-service_url = os.environ.get('CANCER_DETECTION_SERVICE_URL')
-if service_url:
-    logger.debug(service_url)
+inference_server_url = os.environ.get('INFERENCE_SERVER_URL')
+if inference_server_url:
+    logger.debug(inference_server_url)
 else:
-    logger.error("Cancer Detection Service URL not provided")
+    logger.error("Inference server URL not provided")
 
 service_hash="7c1b82323f5a205e603a80d7e951f1235f16907f"
+service_route="/lung_cancer_detection/inference"
 provider="IBM-LAB"
 
 INFERENCE_TIMEOUT = 180 # time in seconds
@@ -95,7 +96,7 @@ while True:
             inference_timeout = INFERENCE_TIMEOUT
             inference_time = 0
 
-            service_request_url = "{}/nodule_detection/inference".format(service_url)
+            service_request_url = inference_server_url + service_route
             with open(file, 'rb') as f:
                 r = requests.post(service_request_url, files={"itk_image": f})
 
@@ -110,7 +111,7 @@ while True:
                 logger.debug('Endpoint :' + result_endpoint)
 
                 while (not inference_ready) and (inference_time < inference_timeout):
-                    r = requests.get(service_url + result_endpoint)
+                    r = requests.get(inference_server_url + result_endpoint)
 
                     if r.status_code == 200:
                         inference_ready = True
